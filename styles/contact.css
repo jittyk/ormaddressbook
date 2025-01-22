@@ -1,0 +1,12 @@
+
+            .contact-details {
+            display: none;
+            }
+            .contact-name {
+            cursor: pointer;
+            color: #5f0606;
+            }
+            .contact-name:hover {
+            color: #220303;
+            }
+      

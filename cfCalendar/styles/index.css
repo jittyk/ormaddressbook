@@ -1,0 +1,130 @@
+body {
+    font-family: Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+.calendar {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background: linear-gradient(135deg, #d3d3d3, #808080);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+.calendar-header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+.calendar-header select {
+    padding: 5px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.calendar-header .year-navigation {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.year-navigation button {
+    padding: 5px 10px;
+    font-size: 16px;
+    border: none;
+    background-color: #808080;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.year-navigation button:hover {
+    background-color: #696969;
+}
+.days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 columns for larger screens */
+    grid-auto-rows: 60px; /* Fixed height for each row */
+    gap: 5px; /* Added gap for spacing */
+    width: 100%; /* Ensure it takes full width of the container */
+    box-sizing: border-box; /* Include padding and border in width */
+}
+.days div {
+    background-color: #eaeaea;
+    border-radius: 4px;
+    font-weight: 900;
+    text-align: center;
+}
+.date-cell {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    text-align: center;
+}
+.date-cell:hover {
+    background-color: #cce5ff;
+    cursor: pointer;
+}
+nav {
+    background-color: black; /* Set navbar background color to black */
+}
+nav .navbar-brand,
+nav .nav-link {
+    color: white; /* Set text color to white */
+}
+main {
+    flex: 1; /* Allow main to grow and fill available space */
+    min-height: 600px; /* Set a fixed minimum height for the main content */
+}
+.days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 columns */
+    grid-auto-rows: 60px; /* Fixed height for each row */
+}
+.date-cell {
+    border: 1px solid #ccc; /* Optional: Add border for visibility */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px; /* Fixed height */
+    width: 100%; /* Full width of the grid cell */
+    color: black
+}
+.month-year {
+    display: flex;
+    align-items: center; /* Align items vertically centered */
+}
+.year-navigation {
+    display: flex;
+    align-items: center; /* Align items vertically centered */
+}
+@media (max-width: 768px) {
+    .calendar-header {
+        flex-direction: column; /* Stack elements vertically */
+        align-items: flex-start; /* Align items to the start */
+    }
+    
+    .calendar-header form {
+        width: 100%; /* Full width for the form */
+        margin-bottom: 10px; /* Space between form and button */
+    }
+
+    .days {
+        grid-template-columns: repeat(7, 1fr); /* Keep 7 columns for mobile */
+        grid-auto-rows: 50px; /* Adjust height for smaller screens */
+    }
+
+    .date-cell {
+        height: 50px; /* Adjust height for smaller screens */
+        font-size: 14px; /* Smaller font size */
+    }
+}
