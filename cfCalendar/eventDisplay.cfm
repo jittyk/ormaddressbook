@@ -86,7 +86,7 @@
                                             <tr>
                                                 <td>
                                                     <cfset str_event_color = "gray">
-                                                    <cfif event.getStr_priority() EQ "High">
+                                                    <cfif criteria.eventArray EQ "High">
                                                         <cfset str_event_color = "red"> <!-- Red for High Priority -->
                                                     <cfelseif event.getStr_priority() EQ "Medium">
                                                         <cfset str_event_color = "orange"> <!-- Orange for Medium Priority -->
