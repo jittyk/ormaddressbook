@@ -39,6 +39,7 @@
         </cfcatch> 
     </cftry> 
 </cfif>  
+<cfset allEvents = []> 
 <cffunction name="getRecurringEvents" access="public" returntype="array"> 
     <!--- Initialize variables --->
     <cfset var recurringEventDates = []>
@@ -47,14 +48,19 @@
     <cfset var hql = "FROM Event WHERE str_recurrence_type != 'none'">
     <cfset var events = ormExecuteQuery(hql)>
     
-    <!--- Loop through each event to generate recurring dates --->
     <cfloop array="#events#" index="event">
-        <cfset var eventStartDate = event.getDt_event_date()>
-        <cfset var recurrenceType = event.getStr_recurrence_type()> <!--- Get the recurrence type --->
-        <cfset var recurringDuration = event.getInt_recurring_duration()> <!--- Get the recurring duration --->
-        <cfset var eventEndDate = eventStartDate> <!--- Initialize eventEndDate to eventStartDate --->
-
-        <!--- Calculate the end date based on the recurrence type and duration --->
+        <cfset var eventStartDate = event.getDt_event_date()> 
+        <cfset var recurrenceType = event.getStr_recurrence_type()> 
+        <cfset var recurringDuration = event.getInt_recurring_duration()> 
+        <cfset var eventId = event.getInt_event_id()>  
+        <cfset var name = event.getStr_event_title()>  
+        <cfset var description = event.getStr_description()>  
+        <cfset var reminderEmail = event.getStr_reminder_email()>  
+        <cfset var priority = event.getStr_priority()>  
+        <cfset var timeConstraint = event.getStr_time_constraint()>  
+        <cfset var startTime = event.getDt_start_time()> 
+        <cfset var endTime = event.getDt_end_time() >
+        <cfset var eventEndDate = eventStartDate> 
         <cfif recurrenceType EQ 'daily'>
             <cfset eventEndDate = dateAdd('d', recurringDuration, eventStartDate)>
         <cfelseif recurrenceType EQ 'weekly'>
@@ -69,7 +75,20 @@
         <!--- Generate recurring dates based on the recurrence type until the end date --->
         <cfloop condition="currentDate LTE eventEndDate">
             <cfif recurrenceType EQ 'daily'>
-                <cfset arrayAppend(recurringEventDates, {date=currentDate, recurrenceType=recurrenceType, eventId=event.getInt_event_id()})>
+                <cfset arrayAppend(recurringEventDates, {
+                    date=currentDate, 
+                    recurrenceType=recurrenceType, 
+                    eventId=eventId, 
+                    name=name, 
+                    description=description, 
+                    reminderEmail=reminderEmail, 
+                    priority=priority, 
+                    timeConstraint=timeConstraint, 
+                     
+                    startTime=startTime, 
+                    endTime=endTime 
+                                       
+                })>
                 <cfset currentDate = dateAdd('d', 1, currentDate)>
             <cfelseif recurrenceType EQ 'weekly'>
                 <cfset daysOfWeek = event.getDays_of_week().split(",")> <!--- Split the days of the week into an array --->
@@ -81,7 +100,20 @@
                     <cfset var nextOccurrence = currentDate>
                     <cfset nextOccurrence = dateAdd('d', (dayInt - dayOfWeek(currentDate)), nextOccurrence)> <!--- Calculate the next occurrence for the specific day --->
                     <cfif nextOccurrence LTE eventEndDate>
-                        <cfset arrayAppend(recurringEventDates, {date=nextOccurrence, recurrenceType=recurrenceType, eventId=event.getInt_event_id()})>
+                        <cfset arrayAppend(recurringEventDates, {
+                            date=nextOccurrence, 
+                            recurrenceType=recurrenceType, 
+                            eventId=eventId, 
+                            name=name, 
+                            description=description, 
+                            reminderEmail=reminderEmail, 
+                            priority=priority, 
+                            timeConstraint=timeConstraint, 
+                             
+                            startTime=startTime, 
+                            endTime=endTime 
+                                                       
+                        })>
                     </cfif>
                 </cfloop>
                 <cfset currentDate = dateAdd('ww', 1, currentDate)> <!--- Move to the next week --->
@@ -91,7 +123,20 @@
                     <cfset var nextOccurrence = dateAdd('m', 1, currentDate)> <!--- Move to the next month --->
                     <cfset nextOccurrence = createDate(year(nextOccurrence), month(nextOccurrence), day)> <!--- Set the day of the month using createDate --->
                     <cfif nextOccurrence LTE eventEndDate>
-                        <cfset arrayAppend(recurringEventDates, {date=nextOccurrence, recurrenceType=recurrenceType, eventId=event.getInt_event_id()})>
+                        <cfset arrayAppend(recurringEventDates, {
+                            date=nextOccurrence, 
+                            recurrenceType=recurrenceType, 
+                            eventId=eventId, 
+                            name=name, 
+                            description=description, 
+                            reminderEmail=reminderEmail, 
+                            priority=priority, 
+                            timeConstraint=timeConstraint, 
+                             
+                            startTime=startTime, 
+                            endTime=endTime 
+                                                       
+                        })>
                     </cfif>
                 </cfloop>
                 <cfset currentDate = dateAdd('m', 1, currentDate)> <!--- Move to the next month --->
@@ -105,100 +150,87 @@
     <cfreturn recurringEventDates> 
 </cffunction>
 
-    
 <cfif structKeyExists(form, "view")> 
     <cfswitch expression="#form.view#"> 
         <cfcase value="month"> 
-            <!--- Initialize variables ---> 
             <cfset startOfMonth = variables.startDate> 
             <cfset endOfMonth = variables.endDate> 
-            <cfset dateArray = []> 
-            
-            <!--- Get recurring events ---> 
+            <cfset eventArray = []> 
             <cfset recurringEvents = getRecurringEvents()> 
-            
-            <!--- Iterate through recurring events ---> 
-            <cfloop array="#recurringEvents#" index="event">
-                <cfdump var="#DateFormat(event.DATE,"yyyy-mm-dd")#" >
-                <cfloop condition="currentDate LTE endOfMonth">
-                    <cfdump var="#DateFormat(currentDate,"yyyy-mm-dd")#" >
-                
-                    
-                    <!--- Check if the event date matches the currentDate in the loop ---> 
-                    <cfif DateFormat(event.DATE,"yyyy-mm-dd") EQ DateFormat(currentDate, "yyyy-mm-dd")>
-                       
-                        <!--- Check if the event is monthly and add to dateArray if matched ---> 
-                        <cfif event.RECURRENCETYPE EQ "monthly">
-                            <cfset arrayAppend(dateArray, currentDateFormatted)>
+            <cfloop array="#recurringEvents#" index="event"> 
+                <cfif event.DATE GTE currentDate AND event.DATE LTE endOfMonth>
+                    <cfloop from="#currentDate#" to="#endOfMonth#" index="currentDateLoop">
+                        <cfif currentDateLoop EQ event.DATE AND event.RECURRENCETYPE EQ "monthly">
+                            <cfset arrayAppend(eventArray, event)>
                         </cfif>
-                    </cfif>
-                    
-                    <!--- Increment currentDate by 1 day ---> 
-                    <cfset currentDate = DateAdd("d", 1, currentDate)>
-                </cfloop>
+                    </cfloop>
+                </cfif>
             </cfloop>
-            <cfdump var="#dateArray#" abort>
-            <!--- Create criteria for future use ---> 
-            <cfset criteria = {
-                dt_event_date = dateArray
-            }>
         </cfcase>
-        
-        
         <cfcase value="week"> 
             <cfset startOfWeek = dateAdd("d", -dayOfWeek(variables.currentDate) + 1, variables.currentDate)> 
             <cfset endOfWeek = dateAdd("d", 7 - dayOfWeek(variables.currentDate), variables.currentDate)> 
-            
-            <!--- Create an array of dates between startOfWeek and endOfWeek ---> 
-            <cfset dateArray = []>
-        
-            <cfloop from="#startOfWeek#" to="#endOfWeek#" index="currentDate" step="1">
-                <!--- Format the date to desired format and append to array ---> 
-                <cfset arrayAppend(dateArray, DateFormat(currentDate, "yyyy-mm-dd"))>
+            <cfset eventArray = []>
+            <cfloop array="#recurringEvents#" index="event"> 
+                <cfif event.DATE GTE currentDate AND event.DATE LTE endOfWeek>
+                    <cfloop from="#currentDate#" to="#endOfWeek#" index="currentDateLoop">
+                        <cfif currentDateLoop EQ event.DATE AND event.RECURRENCETYPE EQ "weekly">
+                            <cfset arrayAppend(eventArray, event)>
+                        </cfif>
+                    </cfloop>
+                </cfif>
             </cfloop>
-        
-            <!--- Set the criteria struct with the date array ---> 
-            <cfset criteria = {
-                dt_event_date = dateArray
-            }> 
-        
-            <cfset recurringEventDates = getRecurringEvents(startOfWeek, endOfWeek)> 
-        </cfcase> 
-        
+        </cfcase>
         <cfcase value="day"> 
             <cfset startOfDay = createDateTime(variables.currentYear, variables.currentMonth, variables.currentDay, 0, 0, 0)> 
-            <cfset endOfDay = createDateTime(variables.currentYear, variables.currentMonth, variables.currentDay, 23, 59, 59)> 
-            
-            <!--- Create an array of a single date for the day ---> 
-            <cfset dateArray = [DateFormat(startOfDay, "yyyy-mm-dd")]>
-        
-            <!--- Set the criteria struct with the date array ---> 
-            <cfset criteria = {
-                dt_event_date = dateArray
-            }> 
-        
+            <cfset endOfDay = createDateTime(variables.currentYear, variables.currentMonth, variables.currentDay, 23, 59, 59)>
+            <cfset eventArray = [DateFormat(startOfDay, "yyyy-mm-dd")]>
             <cfset recurringEventDates = getRecurringEvents(startOfDay, endOfDay)> 
-        </cfcase> 
-        
-        
+        </cfcase>
         <cfdefaultcase> 
-            <cfset criteria = {}> 
-        </cfdefaultcase> 
-       
+            <cfset arrayAppend(eventArray, "")>
+        </cfdefaultcase>
     </cfswitch> 
 </cfif>
 
-<!--- Initialize events ---> 
-<cfset events = []>
+<cfset nonRecurringEvents = []> 
 
-<cftry>
-    <!--- Construct the dynamic criteria to select int_event_id based on dt_event_date using HQL --->
-    <cfset queryCriteria = "FROM Event WHERE int_event_id IN (SELECT int_event_id FROM Event WHERE dt_event_date IN (:dateList))"> 
-    <cfset params = {dateList: criteria.dt_event_date}>
+
+<cfset nonRecurringEvents = getNonRecurringEvents()>
+
+<cffunction name="getNonRecurringEvents" access="private" returntype="array">
+    <cfset var nonRecurringEvents = []>
+    <cfset var event = {}>
     
-    <cfset events = ormExecuteQuery(queryCriteria, params)> <!--- Load events based on the criteria using HQL --->
-    
-<cfcatch>
-    <cfset variables.errorMessage = "Error loading events: " & cfcatch.message>
-</cfcatch> 
-</cftry>
+    <!--- Load non-recurring events from the database --->
+    <cfset nonRecurringEvents = entityLoad("Event", {str_recurrence_type='none'})>
+    <cfset nonRecurringEventsArray = []>
+    <cfloop array="#nonRecurringEvents#" index="event">
+        <cfset arrayAppend(nonRecurringEventsArray, {
+            eventId = event.getInt_event_id(),
+            title = event.getStr_event_title(),
+            description = event.getStr_description(),
+            reminderEmail = event.getStr_reminder_email(),
+            priority = event.getStr_priority(),
+            timeConstraint = event.getStr_time_constraint(),
+            startTime = event.getDt_start_time(),
+            endTime = event.getDt_end_time(),
+            mailSent = event.getBit_mail_sent(),
+            eventDate = event.getDt_event_date(),
+            daysOfWeek = event.getDays_of_week(),
+            daysOfMonth = event.getDays_of_month(),
+            recurrenceType = event.getStr_recurrence_type(),
+            recurringDuration = event.getInt_recurring_duration(),
+            recurring = event.getStr_recurring()
+        })>
+    </cfloop>
+    <cfset nonRecurringEvents = nonRecurringEventsArray>
+    <cfreturn nonRecurringEvents>
+</cffunction>
+<cfset currentDate = dateFormat(now(),"yyyy-mm-dd")>
+<cfloop array="#nonRecurringEvents#" index="event">
+    <cfif event.eventDate EQ currentDate >
+        <cfset arrayAppend(eventArray, event)>
+    </cfif>
+</cfloop>
+

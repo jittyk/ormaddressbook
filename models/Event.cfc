@@ -32,14 +32,14 @@
         <cfreturn dayMapping[trim(arguments.dayName)]>
     </cffunction>
 
-    <!---<cffunction name="test" returntype="any" access="remote">
+  <cffunction name="test" returntype="any" access="remote">
         <cfdump var="hei " abort>
     </cffunction>
 
-    <!--- Getter for formatted event date --->
+   
     <cffunction name="getFormattedEventDate" access="public" returntype="string">
         <cfreturn DateFormat(dt_event_date, 'yyyy-mm-dd')>
-    </cffunction>--->
+    </cffunction>
 </cfcomponent> 
 
 
