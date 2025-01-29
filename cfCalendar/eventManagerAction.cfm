@@ -1,57 +1,69 @@
-<!-- Define function to query events -->
-<cffunction name="getEvents" access="public" returntype="query" output="false">
+<cffunction name="getEvents" access="public" returntype="array" output="false">
     <cfargument name="selectedDate" type="date" required="true">
     <cfargument name="datasource" type="string" required="true">
-
-    <cfset var qryEvents = "" />
+    
     <cfset var formattedDate = dateFormat(arguments.selectedDate, "yyyy-mm-dd") />
     <cfset var startDate = dateAdd("d", -30, arguments.selectedDate) />
     <cfset var endDate = dateAdd("d", 30, arguments.selectedDate) />
-
-    <cfquery name="qryEvents" datasource="#arguments.datasource#">
-        SELECT 
-            int_event_id AS id,
-            str_event_title,
-            str_description,
-            str_reminder_email,
-            str_priority,
-            str_time_constraint,
-            dt_start_time,
-            dt_end_time,
-            bit_mail_sent,
-            dt_event_date,
-            days_of_week,
-            days_of_month,
-            str_recurrence_type,
-            int_recurring_duration
-        FROM tbl_events
-        WHERE 
-            (str_recurrence_type = 'none' AND dt_event_date = <cfqueryparam value="#formattedDate#" cfsqltype="cf_sql_date">)
-            OR 
-            (str_recurrence_type = 'daily' AND dt_event_date <= <cfqueryparam value="#formattedDate#" cfsqltype="cf_sql_date"> 
-                AND DATE_ADD(dt_event_date, INTERVAL int_recurring_duration - 1 DAY) >= <cfqueryparam value="#formattedDate#" cfsqltype="cf_sql_date">
-            )
-            <!--- Match weekly recurrence for multiple days of the week --->
-            OR 
-            (
-                str_recurrence_type = 'weekly'
-                AND dt_event_date <= <cfqueryparam value="#formattedDate#" cfsqltype="cf_sql_date">
-                AND DATE_ADD(dt_event_date, INTERVAL int_recurring_duration MONTH) >= <cfqueryparam value="#formattedDate#" cfsqltype="cf_sql_date">
-                AND FIND_IN_SET(DAYNAME(<cfqueryparam value="#formattedDate#" cfsqltype="cf_sql_date">), days_of_week) > 0
-                AND days_of_week IS NOT NULL
-                AND days_of_week != ''
-                
-            )
-
-            OR 
-            (str_recurrence_type = 'monthly' AND dt_event_date <= <cfqueryparam value="#formattedDate#" cfsqltype="cf_sql_date">
-                AND FIND_IN_SET(DAY(<cfqueryparam value="#formattedDate#" cfsqltype="cf_sql_date">), days_of_month) > 0
-                AND DATE_ADD(dt_event_date, INTERVAL int_recurring_duration MONTH) >= <cfqueryparam value="#formattedDate#" cfsqltype="cf_sql_date">
-            )
-    </cfquery>
+    <cfset var events = [] />
     
-    <cfreturn qryEvents />
+    <!--- Fetch events with ORM ---> 
+    <cfset var allEvents = entityLoad("Event")>
+
+    <!--- Loop through all events and filter by recurrence rules --->
+    <cfloop array="#allEvents#" index="event">
+        <cfset var eventDate = event.getDt_event_date()>
+        <cfset var recurrenceType = event.getStr_recurrence_type()>
+
+        <!--- Handle "none" recurrence type --->
+        <cfif recurrenceType eq "none" AND dateFormat(eventDate, "yyyy-mm-dd") eq formattedDate>
+            <cfset arrayAppend(events, event)>
+        
+        <!--- Handle "daily" recurrence type --->
+        <cfelseif recurrenceType eq "daily">
+            <!-- Calculate the next occurrence of the event based on the recurring duration -->
+            <cfset var endDate = dateAdd("d", event.getInt_recurring_duration() - 1, eventDate)>
+            <cfif eventDate LTE arguments.selectedDate AND endDate GTE arguments.selectedDate>
+                <cfset arrayAppend(events, event)>
+            </cfif>
+       
+        <!--- Handle "weekly" recurrence type --->
+        <cfelseif recurrenceType eq "weekly">
+            <!-- Calculate the next occurrence by adding weeks to the event date -->
+            <cfset var endDate = dateAdd("ww", event.getInt_recurring_duration(), eventDate)>
+            <cfif eventDate LTE arguments.selectedDate AND endDate GTE arguments.selectedDate>
+                <cfset var eventDays = event.getDays_of_week()>
+                <cfset var dayIntegers = []>
+        
+                <cfloop array="#eventDays#" index="day">
+                    <cfset arrayAppend(dayIntegers, getDayOfWeekInteger(day))>
+                </cfloop>
+                <cfset dayIntegers=arrayToList(dayIntegers)>
+                <cfset var dayOfWeek = dayOfWeek(arguments.selectedDate)>
+                
+                <cfif findNoCase(dayOfWeek, dayIntegers)>
+                    <cfset arrayAppend(events, event)>
+                </cfif>
+            </cfif>
+        
+        <!--- Handle "monthly" recurrence type --->
+        <cfelseif recurrenceType eq "monthly">
+            <!-- Calculate the next occurrence by adding months to the event date -->
+            <cfset var endDate = dateAdd("m", event.getInt_recurring_duration(), eventDate)>
+            <cfif eventDate LTE arguments.selectedDate AND endDate GTE arguments.selectedDate>
+                <!-- Check if the day of the selected date matches the event's recurrence days -->
+                <cfset var dayOfMonth = day(arguments.selectedDate)>
+                <cfif findNoCase(dayOfMonth, event.getDays_of_month())>
+                    <cfset arrayAppend(events, event)>
+                </cfif>
+            </cfif>
+        </cfif>
+    </cfloop>
+
+    <cfreturn events />
 </cffunction>
+
+
 
 <!-- Control Block -->
 <cfset variables.datasource = "dsn_address_book">
@@ -69,3 +81,4 @@
 <!-- Store queried events and the selected date in variables -->
 <cfset variables.qryEvents = qryEvents>
 <cfset variables.selectedDate = selectedDate>
+
