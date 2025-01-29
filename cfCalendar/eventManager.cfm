@@ -16,49 +16,49 @@
                     <cfif structKeyExists(variables, "message")>
                         <p>#variables.message#</p>
                     </cfif>
-                    <cfif qryEvents.recordCount GT 0>
+                    <cfif arrayLen(variables.qryEvents) GT 0>
                         <ul class="list-group">
-                            <cfloop query="qryEvents">
+                            <cfloop array="#variables.qryEvents#" index="event">
                                 <li class="list-group-item">
-                                    <h5>#str_event_title#</h5>
-                                    <p><strong>Description:</strong> #str_description#</p>
+                                    <h5>#event.getStr_event_title()#</h5>
+                                    <p><strong>Description:</strong> #event.getStr_description()#</p>
                                     <p><strong>Priority:</strong> 
                                         <span class="badge 
-                                            <cfif str_priority EQ "low">bg-success
-                                            <cfelseif str_priority EQ "medium">bg-warning
+                                            <cfif event.getStr_priority() EQ "low">bg-success
+                                            <cfelseif event.getStr_priority() EQ "medium">bg-warning
                                             <cfelse>bg-danger</cfif>">
-                                            #str_priority#
+                                            #event.getStr_priority()#
                                         </span>
                                     </p>
-                                    <p><strong>Recurring:</strong> #str_recurrence_type#</p>
-                                    <p><strong>Start Time:</strong> #timeFormat(qryEvents.dt_start_time, "HH:mm:ss")#</p>
-                                    <p><strong>End Time:</strong> #timeFormat(qryEvents.dt_end_time, "HH:mm:ss")#</p>
+                                    <p><strong>Recurring:</strong> #event.getStr_recurrence_type()#</p>
+                                    <p><strong>Start Time:</strong> #timeFormat(event.getDt_start_time(), "HH:mm:ss")#</p>
+                                    <p><strong>End Time:</strong> #timeFormat(event.getDt_end_time(), "HH:mm:ss")#</p>
                                     
                                     <!-- Display Recurring Dates for Daily, Weekly, or Monthly -->
-                                    <cfif str_recurrence_type EQ "daily">
+                                    <cfif event.getStr_recurrence_type() EQ "daily">
                                         <p><strong>Next Occurrence:</strong> 
-                                            #dateFormat(dateAdd("d", int_recurring_duration, dt_event_date), "dd MMM yyyy")#
+                                            #dateFormat(dateAdd("d", event.getInt_recurring_duration(), event.getDt_event_date()), "dd MMM yyyy")#
                                         </p>
-                                    <cfelseif str_recurrence_type EQ "weekly">
+                                    <cfelseif event.getStr_recurrence_type() EQ "weekly">
                                         <p><strong>Next Occurrence:</strong> 
-                                            #dateFormat(dateAdd("d", 7, dt_event_date), "dd MMM yyyy")# 
+                                            #dateFormat(dateAdd("d", 7, event.getDt_event_date()), "dd MMM yyyy")# 
                                         </p>
-                                    <cfelseif str_recurrence_type EQ "monthly">
+                                    <cfelseif event.getStr_recurrence_type() EQ "monthly">
                                         <p><strong>Next Occurrence:</strong> 
-                                            #dateFormat(dateAdd("m", int_recurring_duration, dt_event_date), "dd MMM yyyy")#
+                                            #dateFormat(dateAdd("m", event.getInt_recurring_duration(), event.getDt_event_date()), "dd MMM yyyy")#
                                         </p>
                                     </cfif>
-            
+                    
                                     <!-- Edit Event Form -->
                                     <form action="addEvent.cfm" method="post">
-                                        <input type="hidden" name="eventId" value="#id#">
-                                        <input type="hidden" name="selectedDate" value="#dateFormat(selectedDate, 'yyyy-mm-dd')#">
+                                        <input type="hidden" name="eventId" value="#event.getInt_event_id()#">
+                                        <input type="hidden" name="selectedDate" value="#dateFormat(variables.selectedDate, 'yyyy-mm-dd')#">
                                         <button type="submit" class="btn btn-warning">Edit</button>
                                     </form>
-            
+                    
                                     <!-- Delete Event Form -->
                                     <form action="deleteEvent.cfm" method="post">
-                                        <input type="hidden" name="eventId" value="#id#">
+                                        <input type="hidden" name="eventId" value="#event.getInt_event_id()#">
                                         <button type="submit" class="btn btn-danger">Delete</button>
                                     </form>
                                 </li>

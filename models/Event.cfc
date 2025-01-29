@@ -1,4 +1,4 @@
-<cfcomponent persistent="true" table="tbl_events">
+<cfcomponent persistent="true" table="tbl_events" entityname="Event">
     <cfproperty name="int_event_id" fieldtype="id" generator="native">
     <cfproperty name="str_event_title" >
     <cfproperty name="str_description" >
