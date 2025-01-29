@@ -1,4 +1,4 @@
-<cfinclude template="indexAction.cfm">
+<cfinclude template="indexAction.cfm"> 
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,7 +18,8 @@
             <div class="calendar">
                 <div class="calendar-header d-flex flex-wrap">
                     <form method="post" class="d-flex flex-wrap w-100">
-                        <div><label for="month" class="me-2">Month:</label>
+                        <div>
+                            <label for="month" class="me-2">Month:</label>
                             <select id="month" name="month" onchange="this.form.submit()">
                                 <cfloop index="i" from="1" to="12">
                                     <option value="#i#" <cfif i eq selectedMonth>selected</cfif>>#monthAsString(i)#</option>
@@ -47,20 +48,25 @@
                         <div class="date-cell"></div>
                     </cfloop>
 
+                    <!-- Display events and dates -->
+                    
                     <cfloop array="#datesData#" index="date">
                         <form action="eventManager.cfm" method="post" class="w-100">
                             <input type="hidden" name="date" value="#dateFormat(date.selectedDate, 'yyyy-mm-dd')#">
+                            <!---<input type="hidden" name="eventId" value="#date.eventId#"> --->
                             <button type="submit" 
                                     class="date-cell 
                                         <cfif date.isToday> text-primary</cfif>
                                         <cfif date.isHoliday> text-danger</cfif>
-                                        <cfif date.hasEvent> bg-warning </cfif> 
+                                        <cfif date.hasEvent> bg-warning </cfif>
+                                        <cfif arrayContains(recurringEvents, date.selectedDate)> bg-success </cfif> <!-- Add this line -->
                                     ">
                                 #date.day# 
                             </button>
                         </form>
                     </cfloop>
 
+                    <!-- Fill trailing empty cells -->
                     <cfloop index="j" from="1" to="#emptyCells#">
                         <div class="date-cell"></div>
                     </cfloop>

@@ -90,8 +90,8 @@
                                                 <td>#event.RECURRENCETYPE#</td>
                                                 <td>
                                                     <form action="addEvent.cfm" method="post" style="display: inline-block; margin-right: 5px;">
-                                                        <!---<input type="hidden" name="eventId" value="#int_event_id#">
-                                                        <input type="hidden" name="selectedDate" value="#DateFormat(dt_event_date, 'yyyy-mm-dd')#">--->
+                                                        <input type="hidden" name="eventId" value="#event.EVENTID#">
+                                                        <input type="hidden" name="selectedDate" value="#DateFormat(event.DATE, 'yyyy-mm-dd')#">
                                                         <button type="submit" class="btn btn-sm btn-warning">
                                                             <i class="bi bi-pencil"></i> Edit
                                                         </button>

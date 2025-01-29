@@ -109,10 +109,8 @@
                             reminderEmail=reminderEmail, 
                             priority=priority, 
                             timeConstraint=timeConstraint, 
-                             
                             startTime=startTime, 
                             endTime=endTime 
-                                                       
                         })>
                     </cfif>
                 </cfloop>
@@ -132,24 +130,17 @@
                             reminderEmail=reminderEmail, 
                             priority=priority, 
                             timeConstraint=timeConstraint, 
-                             
                             startTime=startTime, 
                             endTime=endTime 
-                                                       
-                        })>
+                            })>
                     </cfif>
                 </cfloop>
                 <cfset currentDate = dateAdd('m', 1, currentDate)> <!--- Move to the next month --->
-            <cfelseif recurrenceType EQ 'yearly'>
-                <cfset currentDate = dateAdd('yyyy', 1, currentDate)>
             </cfif>
         </cfloop>
     </cfloop>
-    
-    <!--- Return the array of recurring event dates with additional information --->
     <cfreturn recurringEventDates> 
 </cffunction>
-
 <cfif structKeyExists(form, "view")> 
     <cfswitch expression="#form.view#"> 
         <cfcase value="month"> 
@@ -160,7 +151,7 @@
             <cfloop array="#recurringEvents#" index="event"> 
                 <cfif event.DATE GTE currentDate AND event.DATE LTE endOfMonth>
                     <cfloop from="#currentDate#" to="#endOfMonth#" index="currentDateLoop">
-                        <cfif currentDateLoop EQ event.DATE AND event.RECURRENCETYPE EQ "monthly">
+                        <cfif currentDateLoop EQ event.DATE >
                             <cfset arrayAppend(eventArray, event)>
                         </cfif>
                     </cfloop>
@@ -171,10 +162,11 @@
             <cfset startOfWeek = dateAdd("d", -dayOfWeek(variables.currentDate) + 1, variables.currentDate)> 
             <cfset endOfWeek = dateAdd("d", 7 - dayOfWeek(variables.currentDate), variables.currentDate)> 
             <cfset eventArray = []>
+            <cfset recurringEvents = getRecurringEvents()> 
             <cfloop array="#recurringEvents#" index="event"> 
                 <cfif event.DATE GTE currentDate AND event.DATE LTE endOfWeek>
                     <cfloop from="#currentDate#" to="#endOfWeek#" index="currentDateLoop">
-                        <cfif currentDateLoop EQ event.DATE AND event.RECURRENCETYPE EQ "weekly">
+                        <cfif currentDateLoop EQ event.DATE >
                             <cfset arrayAppend(eventArray, event)>
                         </cfif>
                     </cfloop>
@@ -184,8 +176,13 @@
         <cfcase value="day"> 
             <cfset startOfDay = createDateTime(variables.currentYear, variables.currentMonth, variables.currentDay, 0, 0, 0)> 
             <cfset endOfDay = createDateTime(variables.currentYear, variables.currentMonth, variables.currentDay, 23, 59, 59)>
-            <cfset eventArray = [DateFormat(startOfDay, "yyyy-mm-dd")]>
-            <cfset recurringEventDates = getRecurringEvents(startOfDay, endOfDay)> 
+            <cfset eventArray = []>
+            <cfset recurringEvents = getRecurringEvents()>
+            <cfloop array="#recurringEvents#" index="event"> 
+                <cfif currentDate EQ event.DATE >
+                    <cfset arrayAppend(eventArray, event)>
+                </cfif>
+            </cfloop>
         </cfcase>
         <cfdefaultcase> 
             <cfset arrayAppend(eventArray, "")>
