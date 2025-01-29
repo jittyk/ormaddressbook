@@ -17,7 +17,7 @@
         <main class="container">
             
         <h2>All Holidays</h2>
-        <cfif arrayLen(holidays) GT 0>
+        <cfif arrayLen(holidaysArray) GT 0>
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -26,12 +26,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <cfloop index="i" from="1" to="#arrayLen(holidays)#">
+                    <cfloop array="#holidaysArray#" index="holiday">
                         <tr>
                             <!-- Display the holiday date in the desired format -->
-                            <td>#DateFormat(holidays[i], "mm/dd/yyyy")#</td>
+                            <td>#DateFormat(holiday.date, "mm/dd/yyyy")#</td>
                             <!-- Display the holiday title -->
-                            <td>#qryholidays.str_holiday_title[i]#</td>  <!-- Correct the query column -->
+                            <td>#holiday.title#</td>
                         </tr>
                     </cfloop>
                 </tbody>
@@ -43,7 +43,6 @@
         </main>
         </cfoutput>
             
-
         <cfinclude template="../footer.cfm">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>

@@ -4,16 +4,16 @@
 
 <!-- Check if the form is submitted with required values -->
 <cfif holidayTitle neq "" and holidayMonth and holidayDay>
+    <!-- Create a new instance of the Holiday object -->
+    <cfset holiday = entityNew("Holiday")>
 
-    <!-- Insert the holiday into the database -->
-    <cfquery datasource="dsn_address_book">
-        INSERT INTO tbl_holidays (int_month, int_day, str_holiday_title)
-        VALUES (
-            <cfqueryparam value="#holidayMonth#" cfsqltype="cf_sql_integer">,
-            <cfqueryparam value="#holidayDay#" cfsqltype="cf_sql_integer">,
-            <cfqueryparam value="#holidayTitle#" cfsqltype="cf_sql_varchar">
-        )
-    </cfquery>
+    <!-- Set the values -->
+    <cfset holiday.setInt_month(holidayMonth)>
+    <cfset holiday.setInt_day(holidayDay)>
+    <cfset holiday.setStr_holiday_title(holidayTitle)>
+
+    <!-- Save the object -->
+    <cfset entitySave(holiday)>
 
     <cfset message = "Holiday added successfully!">
 <cfelse>

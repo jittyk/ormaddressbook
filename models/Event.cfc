@@ -13,7 +13,6 @@
     <cfproperty name="days_of_month" >
     <cfproperty name="str_recurrence_type" >
     <cfproperty name="int_recurring_duration" >
-    <cfproperty name="str_recurring" >
 
     <!--- Method to convert day name to integer --->
     <cffunction name="getDayOfWeekInteger" access="public" returntype="numeric">
@@ -41,5 +40,4 @@
         <cfreturn DateFormat(dt_event_date, 'yyyy-mm-dd')>
     </cffunction>
 </cfcomponent> 
-
 

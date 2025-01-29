@@ -97,3 +97,25 @@ li {
     border-radius: 4px;
     cursor: pointer;
 }
+.event-card {
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.event-card h5 {
+    margin-bottom: 1rem;
+}
+.event-card p {
+    margin-bottom: 0.5rem;
+}
+.badge {
+    font-size: 0.9rem;
+}
+.btn-group {
+    margin-top: 1rem;
+}
+.btn-group .btn {
+    margin-right: 0.5rem;
+}

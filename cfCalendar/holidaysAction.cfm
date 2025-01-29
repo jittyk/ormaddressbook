@@ -2,20 +2,19 @@
 <cfset currentYear = year(now())>
 <cfset variables.selectedYear = structKeyExists(form, "year") ? form.year : currentYear>
 
-<!--- Fetch holidays from the database --->
-<cfquery name="qryholidays" datasource="dsn_address_book">
-    SELECT int_holiday_id, int_month, int_day, str_holiday_title
-    FROM tbl_holidays
-    ORDER BY int_month, int_day ASC
-</cfquery>
-<cfset selectedYear = year(now())> <!-- Set to the current year -->
+<!-- Fetch holidays using ORM -->
+<cfset holidays = EntityLoad("Holiday")>
+<cfset holidaysArray = []> <!-- Initialize an empty array to store holidays -->
 
-<cfset holidays = []> <!-- Initialize an empty array to store holidays -->
-
-<cfloop query="qryholidays">
-    <!-- Create a date for each holiday using the current year, month, and day from the query -->
-    <cfset variables.holidayDate = createDate(selectedYear, qryholidays.int_month, qryholidays.int_day)>
+<cfloop array="#holidays#" index="holiday">
+    <!-- Create a date for each holiday using the current year, month, and day from the ORM object -->
+    <cfset variables.holidayDate = createDate(selectedYear, holiday.getInt_month(), holiday.getInt_day())>
     
-    <!-- Add the holidayDate to the holidays array -->
-    <cfset arrayAppend(holidays, variables.holidayDate)>
+    <!-- Add the holidayDate and title to the holidays array -->
+    <cfset arrayAppend(holidaysArray, {date=variables.holidayDate, title=holiday.getStr_holiday_title()})>
 </cfloop>
+
+<!-- Sort the holidaysArray by date using a custom function -->
+<cfset arraySort(holidaysArray, function(a, b) {
+    return compare(a.date, b.date);
+})>
