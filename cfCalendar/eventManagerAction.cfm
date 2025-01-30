@@ -28,23 +28,30 @@
             </cfif>
        
         <!--- Handle "weekly" recurrence type --->
-        <cfelseif recurrenceType eq "weekly">
-            <!-- Calculate the next occurrence by adding weeks to the event date -->
-            <cfset var endDate = dateAdd("ww", event.getInt_recurring_duration(), eventDate)>
-            <cfif eventDate LTE arguments.selectedDate AND endDate GTE arguments.selectedDate>
-                <cfset var eventDays = event.getDays_of_week()>
-                <cfset var dayIntegers = []>
+    <cfelseif recurrenceType eq "weekly">
+        <!-- Calculate the next occurrence by adding weeks to the event date -->
+        <cfset var endDate = dateAdd("ww", event.getInt_recurring_duration(), eventDate)>
         
-                <cfloop array="#eventDays#" index="day">
-                    <cfset arrayAppend(dayIntegers, getDayOfWeekInteger(day))>
-                </cfloop>
-                <cfset dayIntegers=arrayToList(dayIntegers)>
-                <cfset var dayOfWeek = dayOfWeek(arguments.selectedDate)>
-                
-                <cfif findNoCase(dayOfWeek, dayIntegers)>
-                    <cfset arrayAppend(events, event)>
-                </cfif>
+        <cfif eventDate LTE arguments.selectedDate AND endDate GTE arguments.selectedDate>
+            <!-- Convert comma-separated string to an array -->
+            <cfset var eventDays = listToArray(event.getDays_of_week())>
+            <cfset var dayIntegers = []>
+    
+            <!-- Loop through the array -->
+            <cfloop array="#eventDays#" index="day">
+                <cfset arrayAppend(dayIntegers, event.getDayOfWeekInteger(trim(day)))>
+            </cfloop>
+    
+            <!-- Convert array to list for comparison -->
+            <cfset dayIntegers = arrayToList(dayIntegers)>
+            <cfset var dayOfWeek = dayOfWeek(arguments.selectedDate)>
+    
+            <!-- Check if the selected day exists in the eventDays -->
+            <cfif findNoCase(dayOfWeek, dayIntegers)>
+                <cfset arrayAppend(events, event)>
             </cfif>
+        </cfif>
+    
         
         <!--- Handle "monthly" recurrence type --->
         <cfelseif recurrenceType eq "monthly">
