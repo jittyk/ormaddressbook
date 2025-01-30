@@ -217,8 +217,7 @@
             daysOfWeek = event.getDays_of_week(),
             daysOfMonth = event.getDays_of_month(),
             recurrenceType = event.getStr_recurrence_type(),
-            recurringDuration = event.getInt_recurring_duration(),
-            recurring = event.getStr_recurring()
+            recurringDuration = event.getInt_recurring_duration()
         })>
     </cfloop>
     <cfset nonRecurringEvents = nonRecurringEventsArray>
